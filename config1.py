@@ -12,7 +12,7 @@ class ShellEmulator:
 
     def load_filesystem(self, tar_path):
         with tarfile.open(tar_path, 'r') as tar:
-            tar.extractall("/tmp/virtual_fs")  # Временно извлеките для одного сеанса
+            tar.extractall("/tmp/virtual_fs")
         self.current_directory = "/tmp/virtual_fs"
 
     def list_files(self):
@@ -22,10 +22,6 @@ class ShellEmulator:
             return []
 
     def change_directory(self, path):
-        if path == "/":
-            self.current_directory = "/tmp/virtual_fs"
-            return
-
         target_path = os.path.join(self.current_directory, path)
         if os.path.exists(target_path) and os.path.isdir(target_path):
             self.current_directory = target_path
@@ -85,6 +81,11 @@ class ShellEmulator:
         else:
             print(f"{cmd}: command not found")
 
+    def run_shell(self):
+        while True:
+            command = input(f"{self.user}@{self.host}:{self.current_directory}$ ")
+            self.execute_command(command)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--user', required=True, help='User name for prompt')
@@ -93,7 +94,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     shell_emulator = ShellEmulator(args.user, args.host, args.tar)
-
-    while True:
-        command = input(f"{args.user}@{args.host}:{shell_emulator.current_directory}$ ")
-        shell_emulator.execute_command(command)
+    shell_emulator.run_shell()
