@@ -32,6 +32,34 @@ class ShellEmulator:
         else:
             print(f"cd: no such file or directory: {path}")
 
+    def print_head(self, filename, lines=1):
+        path = os.path.join(self.current_directory, filename)
+        try:
+            with open(path, 'r') as file:
+                for _ in range(lines):
+                    line = file.readline()
+                    if not line:
+                        break
+                    print(line, end='')
+                    print('\n')
+        except FileNotFoundError:
+            print(f"head: cannot open '{filename}' for reading: No such file or directory")
+
+    def reverse_cat(self, filename):
+        path = os.path.join(self.current_directory, filename)
+        try:
+            with open(path, 'r') as file:
+                lines = file.readlines()
+                for line in reversed(lines):
+                    print(line, end='')
+        except FileNotFoundError:
+            print(f"tac: {filename}: No such file or directory")
+
+    def touch_file(self, filename):
+        path = os.path.join(self.current_directory, filename)
+        with open(path, 'a'):
+            os.utime(path, None)
+
     def execute_command(self, command):
         parts = command.strip().split()
         if not parts:
@@ -47,6 +75,13 @@ class ShellEmulator:
                 print("cd: missing operand")
         elif cmd == "exit":
             exit()
+        elif cmd == "head":
+            lines = int(args[1]) if len(args) > 1 else 10
+            self.print_head(args[0], lines)
+        elif cmd == "tac":
+            self.reverse_cat(args[0])
+        elif cmd == "touch":
+            self.touch_file(args[0])
         else:
             print(f"{cmd}: command not found")
 
